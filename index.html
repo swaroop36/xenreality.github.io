@@ -1,104 +1,105 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>3D Model Viewer - Toggle Models</title>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-    <style>
-      :root {
-        color-scheme: light dark;
-        --bg: #0b0c10;
-        --fg: #e6e6e6;
-        --muted: #a0a4ab;
-        --accent: #4da3ff;
-        --panel: #151821;
-        --border: #283046;
-      }
-      * { box-sizing: border-box; }
-      html, body { height: 100%; margin: 0; }
-      body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, Noto Sans, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-        background: var(--bg);
-        color: var(--fg);
-        display: grid;
-        grid-template-rows: auto 1fr;
-      }
-      header {
-        padding: 12px 16px;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        border-bottom: 1px solid var(--border);
-        background: linear-gradient(0deg, var(--panel), #0e111a);
-      }
-      header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
-      .controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px 14px;
-        align-items: center;
-      }
-      .button {
-        display: inline-flex; align-items: center; gap: 8px;
-        padding: 8px 10px; border-radius: 8px;
-        background: #1c2230; border: 1px solid var(--border);
-        color: var(--fg); cursor: pointer; font-size: 12px;
-      }
-      .button.primary { background: var(--accent); color: #06121f; border-color: transparent; }
-      .spacer { width: 1px; height: 24px; background: var(--border); margin: 0 6px; }
-      #viewer-wrap { position: relative; height: calc(100vh - 64px); }
-      model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
-      footer {
-        position: absolute; right: 12px; bottom: 12px; opacity: .75; font-size: 12px; color: var(--muted);
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>3D Model Viewer</h1>
-      <div class="controls">
-        <button id="toggleModel" class="button primary" type="button">Toggle Model</button>
-      </div>
-    </header>
-
-    <div id="viewer-wrap">
-      <model-viewer id="viewer"
-        src="https://raw.githubusercontent.com/<username>/<repo>/<branch>/path/to/model1.glb"
-        ar
-        camera-controls
-        touch-action="pan-y"
-        environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-        skybox-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-        tone-mapping="aces"
-        shadow-intensity="1"
-        exposure="1.0"
-        field-of-view="45deg"
-        alt="3D model viewer"
-      ></model-viewer>
-      <footer>Tip: Click "Toggle Model" to swap between models.</footer>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Model Viewer - Toggle Models</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b0c10;
+      --fg: #e6e6e6;
+      --muted: #a0a4ab;
+      --accent: #4da3ff;
+      --panel: #151821;
+      --border: #283046;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+      background: var(--bg);
+      color: var(--fg);
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    header {
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(0deg, var(--panel), #0e111a);
+    }
+    header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      align-items: center;
+    }
+    .button {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 8px;
+      background: #1c2230; border: 1px solid var(--border);
+      color: var(--fg); cursor: pointer; font-size: 12px;
+    }
+    .button.primary { background: var(--accent); color: #06121f; border-color: transparent; }
+    #viewer-wrap { position: relative; height: calc(100vh - 64px); }
+    model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
+    footer {
+      position: absolute; right: 12px; bottom: 12px; opacity: .75; font-size: 12px; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>3D Model Viewer</h1>
+    <div class="controls">
+      <button id="toggleModel" class="button primary" type="button">Toggle Model</button>
     </div>
+  </header>
 
-    <script>
-      // Replace with your actual GitHub raw model URLs
-      const models = [
-        'https://raw.githubusercontent.com/swaroop36/xenreality.github.io/main/zuri_gold.glb',
-        'https://raw.githubusercontent.com/swaroop36/xenreality.github.io/main/zuri_blue.glb'
-      ];
-      let currentModelIndex = 0;
+  <div id="viewer-wrap">
+    <model-viewer id="viewer"
+      src=""
+      ar
+      camera-controls
+      touch-action="pan-y"
+      environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
+      skybox-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
+      tone-mapping="aces"
+      shadow-intensity="1"
+      exposure="1.0"
+      field-of-view="45deg"
+      alt="3D model viewer">
+    </model-viewer>
+    <footer>Tip: Click "Toggle Model" to swap between models.</footer>
+  </div>
 
-      const viewer = document.getElementById('viewer');
-      const toggleModel = document.getElementById('toggleModel');
+  <script>
+    // ✅ Replace these with your GitHub Pages URLs or CORS-proxied raw links
+    // Example if using GitHub Pages: https://<username>.github.io/<repo>/zuri_gold.glb
+    // Example if using CORS proxy for raw links:
+    // 'https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/swaroop36/xenreality.github.io/main/zuri_gold.glb'
+    const models = [
+      'https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb',
+      'https://swaroop36.github.io/xenreality.github.io/zuri_blue.glb'
+    ];
 
-      // Set initial model
+    let currentModelIndex = 0;
+    const viewer = document.getElementById('viewer');
+    const toggleModel = document.getElementById('toggleModel');
+
+    // Load initial model
+    viewer.src = models[currentModelIndex];
+
+    // Change model on button click
+    toggleModel.addEventListener('click', () => {
+      currentModelIndex = (currentModelIndex + 1) % models.length;
       viewer.src = models[currentModelIndex];
-
-      // Button toggles model
-      toggleModel.addEventListener('click', () => {
-        currentModelIndex = (currentModelIndex + 1) % models.length;
-        viewer.src = models[currentModelIndex];
-      });
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>
-
