@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>3D Model Viewer - Toggle Models</title>
+  <title>3D Model Viewer - Adjustable Zoom</title>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   <style>
     :root {
@@ -46,6 +46,15 @@
       color: var(--fg); cursor: pointer; font-size: 12px;
     }
     .button.primary { background: var(--accent); color: #06121f; border-color: transparent; }
+    .control-group { display: flex; align-items: center; gap: 8px; }
+    input[type="range"] {
+      width: 160px;
+    }
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      user-select: none;
+    }
     #viewer-wrap { position: relative; height: calc(100vh - 64px); }
     model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
     footer {
@@ -58,6 +67,10 @@
     <h1>3D Model Viewer</h1>
     <div class="controls">
       <button id="toggleModel" class="button primary" type="button">Toggle Model</button>
+      <div class="control-group">
+        <label for="zoomRange">Zoom</label>
+        <input id="zoomRange" type="range" min="1" max="10" step="0.1" value="5" />
+      </div>
     </div>
   </header>
 
@@ -73,10 +86,10 @@
       shadow-intensity="1"
       exposure="1.0"
       field-of-view="60deg"
-      camera-orbit="0deg 75deg 3m"
+      camera-orbit="0deg 75deg 5m"
       alt="3D model viewer">
     </model-viewer>
-    <footer>Tip: Click "Toggle Model" to swap between models.</footer>
+    <footer>Tip: Click "Toggle Model" to swap models. Adjust zoom with the slider.</footer>
   </div>
 
   <script>
@@ -89,14 +102,30 @@
     let currentModelIndex = 0;
     const viewer = document.getElementById('viewer');
     const toggleModel = document.getElementById('toggleModel');
+    const zoomRange = document.getElementById('zoomRange');
 
-    // Load initial model
+    // Set initial model
     viewer.src = models[currentModelIndex];
 
-    // Change model on button click
+    // Set initial camera orbit distance based on zoom slider value
+    function updateCameraOrbit() {
+      const distance = zoomRange.value;
+      viewer.cameraOrbit = `0deg 75deg ${distance}m`;
+      viewer.jumpCameraToGoal();
+    }
+
+    // Initialize orbit distance
+    updateCameraOrbit();
+
+    // Toggle model on button click
     toggleModel.addEventListener('click', () => {
       currentModelIndex = (currentModelIndex + 1) % models.length;
       viewer.src = models[currentModelIndex];
+    });
+
+    // Update camera orbit on zoom slider change
+    zoomRange.addEventListener('input', () => {
+      updateCameraOrbit();
     });
   </script>
 </body>
