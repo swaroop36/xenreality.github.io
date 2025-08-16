@@ -3,64 +3,37 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>3D Model Viewer - Adjustable Zoom & Animation</title>
+  <title>3D Model Viewer - Debug Root Y</title>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #0b0c10;
-      --fg: #e6e6e6;
-      --muted: #a0a4ab;
-      --accent: #4da3ff;
-      --panel: #151821;
-      --border: #283046;
+      --bg:#0b0c10; --fg:#e6e6e6; --muted:#a0a4ab; --accent:#4da3ff; --panel:#151821; --border:#283046;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
-      background: var(--bg);
-      color: var(--fg);
-      display: grid;
-      grid-template-rows: auto 1fr;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial;
+      background:var(--bg); color:var(--fg);
+      display:grid; grid-template-rows:auto 1fr;
     }
-    header {
-      padding: 12px 16px;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(0deg, var(--panel), #0e111a);
-    }
-    header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px 20px;
-      align-items: center;
-    }
-    .button {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 13px; border-radius: 8px;
-      background: #1c2230; border: 1px solid var(--border);
-      color: var(--fg); cursor: pointer; font-size: 13px;
-    }
-    .button.primary { background: var(--accent); color: #06121f; border-color: transparent; }
-    .control-group { display: flex; align-items: center; gap: 8px; }
-    input[type="range"] {
-      width: 150px;
-      accent-color: var(--accent);
-    }
-    label {
-      font-size: 13px;
-      color: var(--muted);
-      user-select: none;
-    }
-    #viewer-wrap { position: relative; height: calc(100vh - 64px); }
-    model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
-    footer {
-      position: absolute; right: 14px; bottom: 14px; opacity: .75; font-size: 13px; color: var(--muted);
-    }
+    header{padding:12px 16px; display:flex; gap:16px; align-items:center;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(0deg,var(--panel),#0e111a)}
+    header h1{font-size:16px;margin:0 8px 0 0;font-weight:600}
+    .controls{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+    .button{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:8px;
+      background:#1c2230;border:1px solid var(--border);color:var(--fg);cursor:pointer;font-size:13px}
+    .button.primary{background:var(--accent);color:#06121f;border-color:transparent}
+    .control-group{display:flex;align-items:center;gap:8px}
+    input[type="range"]{width:150px;accent-color:var(--accent)}
+    label{font-size:13px;color:var(--muted);user-select:none}
+    #viewer-wrap{position:relative;height:calc(100vh - 64px)}
+    model-viewer{width:100%;height:100%;background-color:#0d1117}
+    footer{position:absolute;right:14px;bottom:14px;opacity:.75;font-size:13px;color:var(--muted)}
+    .log{position:absolute;left:14px;bottom:14px;width:min(520px,46vw);max-height:32vh;overflow:auto;
+      font:12px ui-monospace,Menlo,Consolas,monospace;background:#0f1320d0;border:1px solid var(--border);
+      padding:8px 10px;border-radius:8px;color:#cfe3ff;white-space:pre-wrap}
   </style>
 </head>
 <body>
@@ -73,6 +46,10 @@
         <input id="zoomRange" type="range" min="10" max="40" step="0.1" value="25" />
       </div>
       <button id="playAnim" class="button" type="button">Play Animation</button>
+      <label class="control-group" title="Keep model height fixed while animations play">
+        <input id="lockY" type="checkbox" checked />
+        Lock Y height
+      </label>
     </div>
   </header>
 
@@ -95,51 +72,139 @@
       animation-loop="false"
       alt="3D model viewer">
     </model-viewer>
-    <footer>Tip: Use the button to switch models, zoom, and play animation.</footer>
+
+    <div id="debugLog" class="log"></div>
+    <footer>Tip: Toggle models, zoom, and play the first animation once. Check the live log for root-Y drift.</footer>
   </div>
 
-  <script>
-    // Model URLs
+  <script type="module">
+    // Models
     const models = [
       'https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb',
       'https://swaroop36.github.io/xenreality.github.io/zuri_blue.glb'
     ];
 
-    let currentModelIndex = 0;
+    // UI refs
     const viewer = document.getElementById('viewer');
     const toggleModel = document.getElementById('toggleModel');
     const zoomRange = document.getElementById('zoomRange');
     const playAnim = document.getElementById('playAnim');
+    const lockYCheckbox = document.getElementById('lockY');
+    const logEl = document.getElementById('debugLog');
 
-    // Set initial model
-    viewer.src = models[currentModelIndex];
+    // State
+    let currentModelIndex = 0;
+    let baseY = 0;
+    let rafId = 0;
 
-    // Function to set camera orbit distance
+    // Utilities
+    const logLines = [];
+    function log(msg) {
+      const time = new Date().toLocaleTimeString();
+      const line = `[${time}] ${msg}`;
+      logLines.push(line);
+      // Keep last 200 lines
+      if (logLines.length > 200) logLines.shift();
+      logEl.textContent = logLines.join('\n');
+      // Also mirror to console
+      console.log(line);
+    }
+
     function updateCameraOrbit() {
       const distance = zoomRange.value;
       viewer.cameraOrbit = `0deg 75deg ${distance}m`;
       viewer.jumpCameraToGoal();
+      log(`Camera orbit -> distance ${distance}m`);
     }
 
-    // Toggle model
+    function startHeightGuard() {
+      cancelAnimationFrame(rafId);
+      const root = viewer.model?.modelContainer?.scene;
+      if (!root) return;
+
+      baseY = root.position.y;
+      log(`Height guard ON. Base Y = ${baseY.toFixed(4)} m`);
+
+      const tick = () => {
+        // Report animation info
+        const name = viewer.animationName ?? '(none)';
+        const t = viewer.currentTime?.toFixed?.(3);
+        const y = root.position.y;
+        const wy = root.matrixWorld.elements[13]; // world Y
+        logEl.dataset.nopaint = ''; // minor trick to avoid layout trashing
+        if (lockYCheckbox.checked) {
+          // Pin local Y to base value
+          root.position.y = baseY;
+          root.updateMatrixWorld();
+        }
+        // Update a compact one-line status at the end of the log
+        const status = `Anim: ${name} | time: ${t} | localY: ${y.toFixed(4)} | worldY: ${wy.toFixed(4)}`;
+        if (logLines.length === 0 || !logLines[logLines.length-1].startsWith('> ')) {
+          logLines.push('> ' + status);
+        } else {
+          logLines[logLines.length-1] = '> ' + status;
+        }
+        logEl.textContent = logLines.slice(-200).join('\n');
+        rafId = requestAnimationFrame(tick);
+      };
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function stopHeightGuard() {
+      cancelAnimationFrame(rafId);
+      log('Height guard OFF.');
+    }
+
+    // Events
+    viewer.addEventListener('load', () => {
+      const url = new URL(viewer.src, location.href).href;
+      log(`Model loaded: ${url}`);
+      const anims = viewer.availableAnimations || [];
+      log(`Available animations: ${anims.length ? anims.join(', ') : '(none)'}`);
+
+      updateCameraOrbit();
+
+      // Start guard loop (logs and optional Y lock)
+      startHeightGuard();
+    });
+
     toggleModel.addEventListener('click', () => {
       currentModelIndex = (currentModelIndex + 1) % models.length;
+      stopHeightGuard();
       viewer.src = models[currentModelIndex];
-      setTimeout(updateCameraOrbit, 400);
+      log(`Switching to model[${currentModelIndex}]...`);
     });
 
-    // Zoom control
     zoomRange.addEventListener('input', updateCameraOrbit);
 
-    // Play animation once
     playAnim.addEventListener('click', () => {
-      viewer.animationName = viewer.availableAnimations[0]; // pick first anim
-      viewer.play({ repetitions: 1 }); // play only once
+      const anims = viewer.availableAnimations || [];
+      if (anims.length === 0) {
+        log('No animations found on this model.');
+        return;
+      }
+      viewer.animationName = anims[0];
+      viewer.currentTime = 0;
+      viewer.play({repetitions: 1});
+      log(`Playing animation once: "${viewer.animationName}"`);
     });
 
-    // Set initial zoom
+    lockYCheckbox.addEventListener('change', () => {
+      if (lockYCheckbox.checked) {
+        startHeightGuard();
+      } else {
+        stopHeightGuard();
+      }
+    });
+
+    // Initial model and camera
+    viewer.src = models[currentModelIndex];
     zoomRange.value = 25;
-    updateCameraOrbit();
+    // If first load is quick, the 'load' handler will call updateCameraOrbit.
+    // Otherwise, ensure a fallback:
+    setTimeout(() => {
+      if (!viewer.model) updateCameraOrbit();
+    }, 500);
   </script>
 </body>
 </html>
