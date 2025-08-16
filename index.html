@@ -2,52 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>3D Model with Animation</title>
+  <title>Model Animation Control</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
-    body { display: flex; flex-direction: column; align-items: center; background: #ddd; }
-    model-viewer { width: 600px; height: 600px; }
-    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #ddd;
+    }
+    model-viewer {
+      width: 600px;
+      height: 600px;
+      background: #ddd;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      background: #0078d7;
+      color: white;
+    }
+    button:hover {
+      background: #005a9e;
+    }
   </style>
 </head>
 <body>
 
+  <!-- 3D Viewer -->
   <model-viewer id="viewer"
-    src="yourmodel.glb"
-    ar
-    camera-controls
-    touch-action="pan-y"
-    autoplay="false"
+    src="yourmodel.glb"   <!-- replace with your .glb url -->
+    alt="Animated model"
     shadow-intensity="1"
-    camera-orbit="0deg 75deg 2.5m"
-    field-of-view="60deg"
-    animation-name="Animation"
-    animation-loop="false"
-    alt="3D model">
+    camera-controls
+    disable-zoom
+    autoplay="false"
+    animation-loop="false">
   </model-viewer>
 
+  <!-- Play Button -->
   <button id="playBtn">Play Animation</button>
 
   <script>
     const viewer = document.querySelector('#viewer');
     const playBtn = document.querySelector('#playBtn');
 
+    let lockRoot = false;
+
+    // Prevent model from sinking into the ground
+    viewer.addEventListener('frameDrawn', () => {
+      if (lockRoot && viewer?.scene?.model) {
+        viewer.scene.model.position.y = 0;
+      }
+    });
+
+    // Play once on button click
     playBtn.addEventListener('click', async () => {
-      // Stop any running animation
+      lockRoot = true;
       viewer.pause();
       viewer.currentTime = 0;
 
-      // Play animation once
-      await viewer.play({repetitions: 1});
-
-      // Auto-center camera so it won’t sink out of view
-      viewer.cameraTarget = 'auto auto auto';
-      viewer.jumpCameraToGoal();
+      // Play once, no loop
+      await viewer.play({ repetitions: 1 });
     });
 
-    // Ensure animation stops at the end
+    // Reset after animation finishes
     viewer.addEventListener('finished', () => {
-      console.log('Animation finished');
+      viewer.pause();
+      viewer.currentTime = 0; // reset pose
+      lockRoot = false;
     });
   </script>
 
