@@ -1,227 +1,117 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>3D Model Viewer</title>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-    <style>
-      :root {
-        color-scheme: light dark;
-        --bg: #0b0c10;
-        --fg: #e6e6e6;
-        --muted: #a0a4ab;
-        --accent: #4da3ff;
-        --panel: #151821;
-        --border: #283046;
-      }
-      * { box-sizing: border-box; }
-      html, body { height: 100%; margin: 0; }
-      body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, Noto Sans, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-        background: var(--bg);
-        color: var(--fg);
-        display: grid;
-        grid-template-rows: auto 1fr;
-      }
-      header {
-        padding: 12px 16px;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        border-bottom: 1px solid var(--border);
-        background: linear-gradient(0deg, var(--panel), #0e111a);
-      }
-      header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
-      .controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px 14px;
-        align-items: center;
-      }
-      .control-group { display: inline-flex; align-items: center; gap: 8px; }
-      .control-group label { color: var(--muted); font-size: 12px; }
-      input[type="range"] { width: 160px; }
-      input[type="file"] { display: none; }
-      .button, label[for] {
-        display: inline-flex; align-items: center; gap: 8px;
-        padding: 8px 10px; border-radius: 8px;
-        background: #1c2230; border: 1px solid var(--border);
-        color: var(--fg); cursor: pointer; font-size: 12px;
-      }
-      .button.primary { background: var(--accent); color: #06121f; border-color: transparent; }
-      .select, select {
-        appearance: none; background: #1c2230; color: var(--fg);
-        border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 12px;
-      }
-      #viewer-wrap { position: relative; height: calc(100vh - 64px); }
-      model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
-      .dropzone {
-        position: absolute; inset: 0; display: grid; place-items: center;
-        pointer-events: none; opacity: 0; transition: opacity .15s ease;
-      }
-      .dropzone.active { opacity: 1; }
-      .dropzone .inner {
-        pointer-events: none; -webkit-user-select: none; user-select: none;
-        border: 2px dashed #4da3ff66; background: #0b1a2a99;
-        padding: 24px 28px; border-radius: 12px; color: var(--fg);
-        -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-      }
-      footer {
-        position: absolute; right: 12px; bottom: 12px; opacity: .75; font-size: 12px; color: var(--muted);
-      }
-      .spacer { width: 1px; height: 24px; background: var(--border); margin: 0 6px; }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>3D Model Viewer</h1>
-      <div class="controls">
-        <input id="fileInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json" />
-        <label for="fileInput" class="button primary">Open .glb/.gltf</label>
-
-        <div class="spacer"></div>
-
-        <div class="control-group">
-          <label for="exposure">Exposure</label>
-          <input id="exposure" type="range" min="0" max="2.5" step="0.05" value="1.0" />
-        </div>
-        <div class="control-group">
-          <label for="shadows">Shadows</label>
-          <input id="shadows" type="range" min="0" max="2" step="0.05" value="1" />
-        </div>
-        <div class="control-group">
-          <label for="fov">FOV</label>
-          <input id="fov" type="range" min="20" max="90" step="1" value="45" />
-        </div>
-
-        <div class="spacer"></div>
-
-        <div class="control-group">
-          <label><input id="autoRotate" type="checkbox" /> Auto-rotate</label>
-        </div>
-        <button id="resetCamera" class="button" type="button">Reset camera</button>
-
-        <div class="spacer"></div>
-
-        <div class="control-group">
-          <label><input id="toggleSkybox" type="checkbox" checked /> Skybox</label>
-        </div>
-
-        <!-- Simple animation button -->
-        <div class="control-group">
-          <button id="playOnce" class="button primary" type="button">Play Animation</button>
-        </div>
-      </div>
-    </header>
-
-    <div id="viewer-wrap">
-      <model-viewer id="viewer"
-        src="file:///E:/3D%20MODELS/zuri_blue.glb"
-        ar
-        camera-controls
-        touch-action="pan-y"
-        environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-        skybox-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-        tone-mapping="aces"
-        shadow-intensity="1"
-        exposure="1.0"
-        field-of-view="45deg"
-        alt="3D model viewer"
-      ></model-viewer>
-
-      <div id="dropzone" class="dropzone" aria-hidden="true">
-        <div class="inner">Drop a .glb or .gltf file to view</div>
-      </div>
-
-      <footer>Tip: Drag & drop a .glb/.gltf file anywhere to load it. .glb is recommended.</footer>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Model Viewer - GitHub Models</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 10px;
+      background: #333;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    model-viewer {
+      flex: 1;
+      background-color: #fff;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+    .button {
+      padding: 6px 12px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+    }
+    .primary {
+      background: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="controls">
+      <button id="prevModel" class="button">Previous Model</button>
+      <button id="nextModel" class="button">Next Model</button>
+      <button id="toggleBg" class="button">Toggle Background</button>
+      <label>Zoom:
+        <input type="range" id="zoomSlider" min="0.5" max="3" step="0.1" value="1" />
+      </label>
+      <button id="playOnce" class="button primary">Play Animation</button>
     </div>
+  </header>
 
-    <script>
-      const viewer = document.getElementById('viewer');
-      const fileInput = document.getElementById('fileInput');
-      const dropzone = document.getElementById('dropzone');
-      const exposure = document.getElementById('exposure');
-      const shadows = document.getElementById('shadows');
-      const fov = document.getElementById('fov');
-      const autoRotate = document.getElementById('autoRotate');
-      const resetCamera = document.getElementById('resetCamera');
-      const toggleSkybox = document.getElementById('toggleSkybox');
-      const playOnce = document.getElementById('playOnce');
+  <model-viewer id="viewer" 
+    src=""
+    camera-controls
+    auto-rotate
+    ar
+    style="width:100%; height:100%;"
+    exposure="1"
+    shadow-intensity="1">
+  </model-viewer>
 
-      const ENV_HDR = 'https://modelviewer.dev/shared-assets/environments/neutral.hdr';
-      let initialOrbit = null;
-      let currentObjectUrl = null;
+  <script>
+    const viewer = document.getElementById('viewer');
 
-      function setObjectUrlFromFile(file) {
-        if (!file) return;
-        if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
-        currentObjectUrl = URL.createObjectURL(file);
-        viewer.src = currentObjectUrl;
+    // Model URLs
+    const models = [
+      'https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb',
+      'https://swaroop36.github.io/xenreality.github.io/zuri_blue.glb'
+    ];
+    let currentModel = 0;
+
+    // Load the first model
+    viewer.src = models[currentModel];
+
+    // Toggle models
+    document.getElementById('nextModel').addEventListener('click', () => {
+      currentModel = (currentModel + 1) % models.length;
+      viewer.src = models[currentModel];
+    });
+    document.getElementById('prevModel').addEventListener('click', () => {
+      currentModel = (currentModel - 1 + models.length) % models.length;
+      viewer.src = models[currentModel];
+    });
+
+    // Toggle background
+    document.getElementById('toggleBg').addEventListener('click', () => {
+      viewer.style.backgroundColor = 
+        viewer.style.backgroundColor === 'white' ? 'lightgray' : 'white';
+    });
+
+    // Zoom control
+    const zoomSlider = document.getElementById('zoomSlider');
+    zoomSlider.addEventListener('input', () => {
+      const zoom = zoomSlider.value;
+      viewer.cameraOrbit = `0deg 75deg ${zoom}m`;
+    });
+
+    // Play first animation once
+    const playOnce = document.getElementById('playOnce');
+    playOnce.addEventListener('click', () => {
+      const animations = viewer.availableAnimations || [];
+      if (animations.length === 0) {
+        alert("This model has no animations!");
+        return;
       }
-
-      fileInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        setObjectUrlFromFile(file);
-        e.target.value = '';
-      });
-
-      // Drag & drop
-      window.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('active');
-      });
-      window.addEventListener('dragleave', (e) => {
-        if (e.target === document || e.target === document.body) {
-          dropzone.classList.remove('active');
-        }
-      });
-      window.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('active');
-        const file = e.dataTransfer?.files?.[0];
-        if (file) setObjectUrlFromFile(file);
-      });
-
-      // Controls → viewer bindings
-      exposure.addEventListener('input', () => viewer.exposure = Number(exposure.value));
-      shadows.addEventListener('input', () => viewer.shadowIntensity = Number(shadows.value));
-      fov.addEventListener('input', () => viewer.fieldOfView = `${Number(fov.value)}deg`);
-      autoRotate.addEventListener('change', () => viewer.autoRotate = autoRotate.checked);
-      toggleSkybox.addEventListener('change', () => {
-        if (toggleSkybox.checked) {
-          viewer.skyboxImage = ENV_HDR;
-        } else {
-          viewer.skyboxImage = null;
-        }
-      });
-
-      resetCamera.addEventListener('click', () => {
-        if (initialOrbit) viewer.cameraOrbit = initialOrbit;
-        viewer.jumpCameraToGoal();
-      });
-
-      // Animation play once
-      playOnce.addEventListener('click', () => {
-        const animations = viewer.availableAnimations || [];
-        if (animations.length === 0) return;
-
-        viewer.animationName = animations[0]; // pick first animation
-        viewer.play({ repetitions: 1 });      // play once
-      });
-
-      // Sync UI with viewer on load
-      viewer.addEventListener('load', () => {
-        initialOrbit = viewer.getCameraOrbit();
-        exposure.value = String(viewer.exposure ?? 1.0);
-        shadows.value = String(viewer.shadowIntensity ?? 1.0);
-        const fovNum = parseFloat(String(viewer.fieldOfView).replace('deg','')) || 45;
-        fov.value = String(fovNum);
-        autoRotate.checked = Boolean(viewer.autoRotate);
-        toggleSkybox.checked = Boolean(viewer.skyboxImage);
-      });
-
-      viewer.environmentImage = ENV_HDR;
-    </script>
-  </body>
+      viewer.animationName = animations[0]; // first animation
+      viewer.play({ repetitions: 1 }); // play once
+    });
+  </script>
+</body>
 </html>
