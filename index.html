@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>3D Model Viewer - Adjustable Zoom & Animation</title>
+  <title>3D Model Viewer - Zoom, Toggle & Animation</title>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   <style>
     :root {
@@ -72,7 +72,7 @@
         <label for="zoomRange">Zoom</label>
         <input id="zoomRange" type="range" min="10" max="40" step="0.1" value="25" />
       </div>
-      <button id="playAnim" class="button" type="button">Play Animation</button>
+      <button id="playAnimation" class="button" type="button">Play Animation</button>
     </div>
   </header>
 
@@ -95,7 +95,7 @@
       animation-loop="false"
       alt="3D model viewer">
     </model-viewer>
-    <footer>Tip: Use the button to switch models, zoom, and play animation.</footer>
+    <footer>Tip: Use the buttons to switch models, zoom, and play animation.</footer>
   </div>
 
   <script>
@@ -109,7 +109,7 @@
     const viewer = document.getElementById('viewer');
     const toggleModel = document.getElementById('toggleModel');
     const zoomRange = document.getElementById('zoomRange');
-    const playAnim = document.getElementById('playAnim');
+    const playAnimation = document.getElementById('playAnimation');
 
     // Set initial model
     viewer.src = models[currentModelIndex];
@@ -131,10 +131,12 @@
     // Zoom control
     zoomRange.addEventListener('input', updateCameraOrbit);
 
-    // Play animation once
-    playAnim.addEventListener('click', () => {
-      viewer.animationName = viewer.availableAnimations[0]; // pick first anim
-      viewer.play({ repetitions: 1 }); // play only once
+    // Play animation once on button click
+    playAnimation.addEventListener('click', () => {
+      viewer.animationName = viewer.availableAnimations[0]; // play first animation
+      viewer.animationLoop = "false"; // ensure no looping
+      viewer.currentTime = 0; // reset to start
+      viewer.play();
     });
 
     // Set initial zoom
