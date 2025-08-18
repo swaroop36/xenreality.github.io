@@ -4,7 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>3D Model Viewer - Zoom, Toggle & Animation</title>
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <!-- Use a version known to exist on Google Hosted Libraries.
+       The attached page lists model-viewer 3.0.0, so we use that. -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
   <style>
     :root {
       color-scheme: light dark;
@@ -85,15 +87,14 @@
       environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
       skybox-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
       tone-mapping="aces"
-      shadow-intensity="1"
       exposure="1.0"
       field-of-view="70deg"
       camera-orbit="0deg 75deg 25m"
       min-camera-orbit="auto auto 5m"
       max-camera-orbit="auto auto 50m"
       autoplay="false"
-      animation-loop="false"
-      alt="3D model viewer">
+      alt="3D model viewer"
+      shadow-intensity="0">
     </model-viewer>
     <footer>Tip: Use the buttons to switch models, zoom, and play animation.</footer>
   </div>
@@ -111,35 +112,92 @@
     const zoomRange = document.getElementById('zoomRange');
     const playAnimation = document.getElementById('playAnimation');
 
-    // Set initial model
+    // Set initial model and ensure no autoplay
     viewer.src = models[currentModelIndex];
+    viewer.autoplay = false;
 
-    // Function to set camera orbit distance
+    // Keep camera distance from slider
     function updateCameraOrbit() {
       const distance = zoomRange.value;
       viewer.cameraOrbit = `0deg 75deg ${distance}m`;
       viewer.jumpCameraToGoal();
     }
 
-    // Toggle model
     toggleModel.addEventListener('click', () => {
       currentModelIndex = (currentModelIndex + 1) % models.length;
       viewer.src = models[currentModelIndex];
       setTimeout(updateCameraOrbit, 400);
     });
 
-    // Zoom control
     zoomRange.addEventListener('input', updateCameraOrbit);
 
-    // Play animation once on button click
-    playAnimation.addEventListener('click', () => {
-      viewer.animationName = viewer.availableAnimations[0]; // play first animation
-      viewer.animationLoop = "false"; // ensure no looping
-      viewer.currentTime = 0; // reset to start
-      viewer.play();
+    // Stop at end helper: pause and clamp to end frame
+    function stopAtEnd() {
+      try {
+        // Pause playback
+        viewer.pause?.();
+        // If we can access duration/endTime, clamp to the end
+        const end = viewer.duration ?? viewer.endTime;
+        if (Number.isFinite(end)) {
+          viewer.currentTime = end;
+        }
+      } catch {}
+    }
+
+    // Extra safety: prevent wrap-around if the clip is authored looping
+    let rafId = null;
+    function watchForWrap() {
+      cancelAnimationFrame(rafId);
+      let lastTime = viewer.currentTime ?? 0;
+      const end = viewer.duration ?? viewer.endTime;
+
+      const tick = () => {
+        const t = viewer.currentTime ?? 0;
+        // If time wrapped (e.g., end->0), force stop
+        if (Number.isFinite(end) && t < lastTime && lastTime > 0.0) {
+          stopAtEnd();
+          return;
+        }
+        lastTime = t;
+        rafId = requestAnimationFrame(tick);
+      };
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function cancelWatch() {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+
+    // On animation finished, fully stop and clamp
+    viewer.addEventListener('finished', () => {
+      cancelWatch();
+      stopAtEnd();
     });
 
-    // Set initial zoom
+    // Play once on button click, never loop
+    playAnimation.addEventListener('click', async () => {
+      const firstAnim = viewer.availableAnimations?.[0] || null;
+      if (!firstAnim) return;
+
+      // Reset and ensure no loop
+      viewer.pause?.();
+      viewer.animationName = firstAnim;
+      viewer.currentTime = 0;
+
+      // Try one-shot play if options are supported
+      try {
+        await viewer.play?.({ repetitions: 1 });
+      } catch {
+        // Fallback for older versions: just play and monitor
+        viewer.play?.();
+      }
+
+      // Start monitoring to prevent wrap-around
+      watchForWrap();
+    });
+
+    // Initial zoom
     zoomRange.value = 25;
     updateCameraOrbit();
   </script>
