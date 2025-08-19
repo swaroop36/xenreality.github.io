@@ -3,9 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>3D Model Viewer - Zoom, Toggle & Animation</title>
-  <!-- Use a version known to exist on Google Hosted Libraries.
-       The attached page lists model-viewer 3.0.0, so we use that. -->
+  <title>3D Model Viewer - Animation Only</title>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
   <style>
     :root {
@@ -37,7 +35,6 @@
     header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
     .controls {
       display: flex;
-      flex-wrap: wrap;
       gap: 12px 20px;
       align-items: center;
     }
@@ -46,17 +43,6 @@
       padding: 8px 13px; border-radius: 8px;
       background: #1c2230; border: 1px solid var(--border);
       color: var(--fg); cursor: pointer; font-size: 13px;
-    }
-    .button.primary { background: var(--accent); color: #06121f; border-color: transparent; }
-    .control-group { display: flex; align-items: center; gap: 8px; }
-    input[type="range"] {
-      width: 150px;
-      accent-color: var(--accent);
-    }
-    label {
-      font-size: 13px;
-      color: var(--muted);
-      user-select: none;
     }
     #viewer-wrap { position: relative; height: calc(100vh - 64px); }
     model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
@@ -69,18 +55,12 @@
   <header>
     <h1>3D Model Viewer</h1>
     <div class="controls">
-      <button id="toggleModel" class="button primary" type="button">Toggle Model</button>
-      <div class="control-group">
-        <label for="zoomRange">Zoom</label>
-        <input id="zoomRange" type="range" min="10" max="40" step="0.1" value="25" />
-      </div>
       <button id="playAnimation" class="button" type="button">Play Animation</button>
     </div>
   </header>
-
   <div id="viewer-wrap">
     <model-viewer id="viewer"
-      src=""
+      src="https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb"
       ar
       camera-controls
       touch-action="pan-y"
@@ -96,47 +76,20 @@
       alt="3D model viewer"
       shadow-intensity="0">
     </model-viewer>
-    <footer>Tip: Use the buttons to switch models, zoom, and play animation.</footer>
+    <footer>Tip: Drag to orbit, scroll to zoom. Use the button to play animation.</footer>
   </div>
-
   <script>
-    // Model URLs
-    const models = [
-      'https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb',
-      'https://swaroop36.github.io/xenreality.github.io/zuri_blue.glb'
-    ];
-
-    let currentModelIndex = 0;
+    // Single model with only Play Animation control
     const viewer = document.getElementById('viewer');
-    const toggleModel = document.getElementById('toggleModel');
-    const zoomRange = document.getElementById('zoomRange');
     const playAnimation = document.getElementById('playAnimation');
 
-    // Set initial model and ensure no autoplay
-    viewer.src = models[currentModelIndex];
+    // Ensure no autoplay
     viewer.autoplay = false;
-
-    // Keep camera distance from slider
-    function updateCameraOrbit() {
-      const distance = zoomRange.value;
-      viewer.cameraOrbit = `0deg 75deg ${distance}m`;
-      viewer.jumpCameraToGoal();
-    }
-
-    toggleModel.addEventListener('click', () => {
-      currentModelIndex = (currentModelIndex + 1) % models.length;
-      viewer.src = models[currentModelIndex];
-      setTimeout(updateCameraOrbit, 400);
-    });
-
-    zoomRange.addEventListener('input', updateCameraOrbit);
 
     // Stop at end helper: pause and clamp to end frame
     function stopAtEnd() {
       try {
-        // Pause playback
         viewer.pause?.();
-        // If we can access duration/endTime, clamp to the end
         const end = viewer.duration ?? viewer.endTime;
         if (Number.isFinite(end)) {
           viewer.currentTime = end;
@@ -144,16 +97,14 @@
       } catch {}
     }
 
-    // Extra safety: prevent wrap-around if the clip is authored looping
+    // Prevent wrap-around if the clip is authored looping
     let rafId = null;
     function watchForWrap() {
       cancelAnimationFrame(rafId);
       let lastTime = viewer.currentTime ?? 0;
       const end = viewer.duration ?? viewer.endTime;
-
       const tick = () => {
         const t = viewer.currentTime ?? 0;
-        // If time wrapped (e.g., end->0), force stop
         if (Number.isFinite(end) && t < lastTime && lastTime > 0.0) {
           stopAtEnd();
           return;
@@ -163,7 +114,6 @@
       };
       rafId = requestAnimationFrame(tick);
     }
-
     function cancelWatch() {
       cancelAnimationFrame(rafId);
       rafId = null;
@@ -179,35 +129,16 @@
     playAnimation.addEventListener('click', async () => {
       const firstAnim = viewer.availableAnimations?.[0] || null;
       if (!firstAnim) return;
-
-      // Reset and ensure no loop
       viewer.pause?.();
       viewer.animationName = firstAnim;
       viewer.currentTime = 0;
-
-      // Try one-shot play if options are supported
       try {
         await viewer.play?.({ repetitions: 1 });
       } catch {
-        // Fallback for older versions: just play and monitor
         viewer.play?.();
       }
-
-      // Start monitoring to prevent wrap-around
       watchForWrap();
     });
-
-    // Initial zoom
-    zoomRange.value = 25;
-    updateCameraOrbit();
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
