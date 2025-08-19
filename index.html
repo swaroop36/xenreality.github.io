@@ -3,62 +3,119 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Model Viewer – With Play Button</title>
+  <title>Model Viewer – Click to Reveal</title>
 
+  <!-- model-viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
+
+  <!-- Inter for headings -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#ffffff; --ink:#202326; --body:#555a5f; --rule:#a2a7ad;
-      --accent:#0a7cff;
+      --ink:#202326;
+      --body:#555a5f;
+      --rule:#a2a7ad;
+      --bg:#ffffff;
+      --circle: #0f172a20; /* hover fill */
     }
     *{box-sizing:border-box;}
     html,body{height:100%;margin:0;}
     body{background:var(--bg);color:var(--ink);font-family:Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
 
-    header{padding:18px 24px; display:flex; align-items:center; justify-content:space-between;}
-    .controls{display:flex; gap:12px;}
-    .btn{
-      appearance:none; border:0; background:var(--accent); color:#fff;
-      padding:10px 14px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer;
-    }
-
+    /* 3-column stage: left text, model, right text */
     .stage{
-      min-height:calc(100vh - 64px);
-      display:grid; grid-template-columns:1fr minmax(340px,480px) 1fr;
-      align-items:center; gap:32px; padding:0 48px 40px;
+      min-height:100vh;
+      display:grid;
+      grid-template-columns: 1fr minmax(420px, 560px) 1fr; /* make middle a bit wider like your screenshot */
+      align-items:center;
+      gap:48px;
+      padding:32px 48px 56px;
     }
-    model-viewer{width:100%; height:min(78vh, 900px); background:transparent; --poster-color:transparent;}
 
+    /* central model area gets a light backdrop to match screenshot */
+    .model-wrap{
+      position:relative;
+      width:100%;
+      height:min(78vh, 900px);
+      display:grid;
+      place-items:center;
+      background:#eef0f5;      /* very light gray behind model like your sample */
+      border-radius:8px;
+    }
+    model-viewer{
+      width:100%; height:100%;
+      background:transparent; --poster-color:transparent;
+    }
+
+    /* Info cards */
     .info{
-      justify-self:center; width:min(520px, 90%); background:#fff; border-radius:30px;
-      padding:36px 44px;
-      box-shadow:0 1px 0 rgba(0,0,0,.05), 0 12px 60px rgba(0,0,0,.06);
+      justify-self:center;
+      width:min(520px, 92%);
+      background:#fff;
+      border-radius:18px;
+      padding:26px 28px;
+      box-shadow:0 20px 60px rgba(0,0,0,.08);
     }
     .kicker{
-      margin:0 0 12px; font-size:14px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-      color:var(--ink); display:flex; align-items:center; gap:12px;
+      margin:0 0 8px;
+      font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+      color:var(--ink);
+      display:flex; align-items:center; gap:12px;
     }
     .rule{flex:1; height:1px; background:var(--rule); opacity:.85;}
-    .copy{margin:10px 0 0; font-size:15px; line-height:1.7; color:var(--body);}
-    .section + .section{margin-top:28px;}
+    .copy{margin:8px 0 0; font-size:14px; line-height:1.7; color:var(--body);}
+    .section + .section{margin-top:18px;}
 
+    /* CLICK TO REVEAL button (perfect circle) */
+    .reveal-wrap{
+      position:relative;
+      width:100%;
+    }
+    .reveal{
+      position:absolute;
+      /* Place it where you marked the red circle:
+         right column, below the right card, offset from the model.
+         Adjust the two values (bottom/right) to fine-tune on your page. */
+      right:8%;
+      bottom:-28px;
+
+      width:160px; height:160px;
+      border-radius:50%;
+      border:2px solid #111;      /* thin black stroke like your reference */
+      background:#fff;
+      display:grid; place-items:center;
+      cursor:pointer;
+      user-select:none;
+      transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
+      z-index:5;
+    }
+    .reveal:hover{
+      background:var(--circle);
+      transform:translateY(-2px);
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+    }
+    .reveal span{
+      font-size:14px; font-weight:600; letter-spacing:.02em;
+      color:#111; text-transform:uppercase;
+    }
+
+    /* Responsive: stack on small screens; keep button under right card */
     @media (max-width:1100px){
-      .stage{grid-template-columns:1fr; gap:18px; padding:0 16px 28px;}
-      model-viewer{order:2; height:64vh;}
-      .info{width:100%; padding:28px 22px; border-radius:22px;}
+      .stage{grid-template-columns:1fr; gap:18px; padding:16px 16px 32px;}
+      .model-wrap{order:2; height:64vh;}
+      .info{width:100%; padding:22px 20px; border-radius:14px;}
+      .reveal{
+        position:relative;
+        right:auto; bottom:auto;
+        margin:8px auto 0;      /* center below right card when stacked */
+        width:140px; height:140px;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1 style="margin:0;font-size:16px;">3D Model Viewer</h1>
-    <div class="controls">
-      <button id="playAnimation" class="btn" type="button">Play Animation</button>
-    </div>
-  </header>
 
   <main class="stage">
     <!-- Left block -->
@@ -74,18 +131,20 @@
     </aside>
 
     <!-- Center model -->
-    <model-viewer id="viewer"
-      src="https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb"
-      ar camera-controls touch-action="pan-y"
-      environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-      skybox-image="https://raw.githubusercontent.com/swaroop36/xenreality.github.io/cd658672d3e06d30acc82e6664dc38c4fdfb5298/white_background.jpg"
-      tone-mapping="aces" exposure="1.0" field-of-view="70deg"
-      camera-orbit="0deg 75deg 25m" min-camera-orbit="auto auto 5m" max-camera-orbit="auto auto 50m"
-      autoplay="false" alt="3D model viewer" shadow-intensity="0">
-    </model-viewer>
+    <div class="model-wrap">
+      <model-viewer id="viewer"
+        src="https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb"
+        ar camera-controls touch-action="pan-y"
+        environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
+        skybox-image="https://raw.githubusercontent.com/swaroop36/xenreality.github.io/cd658672d3e06d30acc82e6664dc38c4fdfb5298/white_background.jpg"
+        tone-mapping="aces" exposure="1.0" field-of-view="70deg"
+        camera-orbit="0deg 75deg 25m" min-camera-orbit="auto auto 5m" max-camera-orbit="auto auto 50m"
+        autoplay="false" alt="3D model viewer" shadow-intensity="0">
+      </model-viewer>
+    </div>
 
-    <!-- Right block -->
-    <aside class="info" aria-label="Right product benefits">
+    <!-- Right block + "Click to reveal" circle button anchored under it -->
+    <aside class="info reveal-wrap" aria-label="Right product benefits">
       <div class="section">
         <h3 class="kicker">Effortless results.<span class="rule"></span></h3>
         <p class="copy">Our mess‑free applicator delivers effortless results in every swipe.</p>
@@ -94,12 +153,17 @@
         <h3 class="kicker">Powered by a breakthrough formula<span class="rule"></span></h3>
         <p class="copy">A game‑changing blend that elevates your skin with every use.</p>
       </div>
+
+      <!-- The circular "CLICK TO REVEAL WHY" button -->
+      <button id="revealBtn" class="reveal" type="button" aria-label="Click to reveal">
+        <span>CLICK TO REVEAL WHY</span>
+      </button>
     </aside>
   </main>
 
   <script>
     const viewer = document.getElementById('viewer');
-    const playBtn = document.getElementById('playAnimation');
+    const revealBtn = document.getElementById('revealBtn');
 
     viewer.autoplay = false;
 
@@ -124,10 +188,10 @@
       rafId = requestAnimationFrame(tick);
     }
     function cancelWatch(){ cancelAnimationFrame(rafId); rafId=null; }
-
     viewer.addEventListener('finished', () => { cancelWatch(); stopAtEnd(); });
 
-    playBtn.addEventListener('click', async () => {
+    // When the circle is clicked, play the first animation once
+    revealBtn.addEventListener('click', async () => {
       const firstAnim = viewer.availableAnimations?.[0] ?? null;
       if (!firstAnim) return;
       viewer.pause?.();
