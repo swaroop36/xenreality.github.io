@@ -3,12 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Model Viewer – Click to Reveal</title>
+  <title>Model Viewer – Click to Reveal (Placed Exactly)</title>
 
-  <!-- model-viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
-
-  <!-- Inter for headings -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 
@@ -18,38 +15,31 @@
       --body:#555a5f;
       --rule:#a2a7ad;
       --bg:#ffffff;
-      --circle: #0f172a20; /* hover fill */
     }
     *{box-sizing:border-box;}
     html,body{height:100%;margin:0;}
     body{background:var(--bg);color:var(--ink);font-family:Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
 
-    /* 3-column stage: left text, model, right text */
+    /* Layout */
     .stage{
       min-height:100vh;
       display:grid;
-      grid-template-columns: 1fr minmax(420px, 560px) 1fr; /* make middle a bit wider like your screenshot */
+      grid-template-columns: 1fr minmax(420px, 560px) 1fr;
       align-items:center;
       gap:48px;
-      padding:32px 48px 56px;
+      padding:24px 48px 56px;
     }
 
-    /* central model area gets a light backdrop to match screenshot */
     .model-wrap{
       position:relative;
       width:100%;
       height:min(78vh, 900px);
-      display:grid;
-      place-items:center;
-      background:#eef0f5;      /* very light gray behind model like your sample */
+      display:grid; place-items:center;
+      background:#eef0f5;
       border-radius:8px;
     }
-    model-viewer{
-      width:100%; height:100%;
-      background:transparent; --poster-color:transparent;
-    }
+    model-viewer{ width:100%; height:100%; background:transparent; --poster-color:transparent; }
 
-    /* Info cards */
     .info{
       justify-self:center;
       width:min(520px, 92%);
@@ -57,69 +47,62 @@
       border-radius:18px;
       padding:26px 28px;
       box-shadow:0 20px 60px rgba(0,0,0,.08);
+      position:relative;   /* anchor for the circle */
     }
+
     .kicker{
-      margin:0 0 8px;
-      font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-      color:var(--ink);
-      display:flex; align-items:center; gap:12px;
+      margin:0 0 8px; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+      color:var(--ink); display:flex; align-items:center; gap:12px;
     }
     .rule{flex:1; height:1px; background:var(--rule); opacity:.85;}
     .copy{margin:8px 0 0; font-size:14px; line-height:1.7; color:var(--body);}
     .section + .section{margin-top:18px;}
 
-    /* CLICK TO REVEAL button (perfect circle) */
-    .reveal-wrap{
-      position:relative;
-      width:100%;
-    }
+    /* Exact circle button placement
+       According to your latest screenshot, the circle sits BELOW the right card,
+       horizontally centered under the middle of the card content area. */
     .reveal{
       position:absolute;
-      /* Place it where you marked the red circle:
-         right column, below the right card, offset from the model.
-         Adjust the two values (bottom/right) to fine-tune on your page. */
-      right:8%;
-      bottom:-28px;
-
+      left:50%;
+      transform:translateX(-50%); /* center horizontally under the card */
+      bottom:-148px;              /* push it down to match your red circle */
       width:160px; height:160px;
       border-radius:50%;
-      border:2px solid #111;      /* thin black stroke like your reference */
+      border:2px solid #111;
       background:#fff;
       display:grid; place-items:center;
       cursor:pointer;
       user-select:none;
-      transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
-      z-index:5;
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+      z-index:3;
     }
     .reveal:hover{
-      background:var(--circle);
-      transform:translateY(-2px);
+      background:#f2f4f7;
+      transform:translateX(-50%) translateY(-2px);
       box-shadow:0 12px 30px rgba(0,0,0,.12);
     }
     .reveal span{
-      font-size:14px; font-weight:600; letter-spacing:.02em;
+      display:block; width:80%; text-align:center;
+      font-size:12px; font-weight:700; letter-spacing:.06em; line-height:1.2;
       color:#111; text-transform:uppercase;
     }
 
-    /* Responsive: stack on small screens; keep button under right card */
+    /* Keep circle centered beneath the card on narrow screens */
     @media (max-width:1100px){
-      .stage{grid-template-columns:1fr; gap:18px; padding:16px 16px 32px;}
-      .model-wrap{order:2; height:64vh;}
-      .info{width:100%; padding:22px 20px; border-radius:14px;}
+      .stage{ grid-template-columns:1fr; gap:18px; padding:12px 16px 120px; }
+      .model-wrap{ order:2; height:64vh; }
+      .info{ width:100%; padding:22px 20px; border-radius:14px; }
       .reveal{
-        position:relative;
-        right:auto; bottom:auto;
-        margin:8px auto 0;      /* center below right card when stacked */
+        bottom:-120px;           /* a bit closer on mobile */
         width:140px; height:140px;
       }
     }
   </style>
 </head>
 <body>
-
   <main class="stage">
     <!-- Left block -->
-    <aside class="info" aria-label="Left product benefits">
+    <aside class="info">
       <div class="section">
         <h3 class="kicker">Hydration that lasts.<span class="rule"></span></h3>
         <p class="copy">Locks in moisture so your skin stays soft and dewy all day.</p>
@@ -143,8 +126,8 @@
       </model-viewer>
     </div>
 
-    <!-- Right block + "Click to reveal" circle button anchored under it -->
-    <aside class="info reveal-wrap" aria-label="Right product benefits">
+    <!-- Right block with circle button placed exactly beneath it -->
+    <aside class="info" id="rightCard">
       <div class="section">
         <h3 class="kicker">Effortless results.<span class="rule"></span></h3>
         <p class="copy">Our mess‑free applicator delivers effortless results in every swipe.</p>
@@ -154,7 +137,7 @@
         <p class="copy">A game‑changing blend that elevates your skin with every use.</p>
       </div>
 
-      <!-- The circular "CLICK TO REVEAL WHY" button -->
+      <!-- Circle button centered under this card -->
       <button id="revealBtn" class="reveal" type="button" aria-label="Click to reveal">
         <span>CLICK TO REVEAL WHY</span>
       </button>
@@ -190,7 +173,7 @@
     function cancelWatch(){ cancelAnimationFrame(rafId); rafId=null; }
     viewer.addEventListener('finished', () => { cancelWatch(); stopAtEnd(); });
 
-    // When the circle is clicked, play the first animation once
+    // Play animation once when clicking the circle
     revealBtn.addEventListener('click', async () => {
       const firstAnim = viewer.availableAnimations?.[0] ?? null;
       if (!firstAnim) return;
