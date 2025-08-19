@@ -3,62 +3,118 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>3D Model Viewer - Animation Only</title>
+  <title>3D Model Viewer with Side Text Panels</title>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
   <style>
-    :root {
+    :root{
       color-scheme: light dark;
-      --bg: #0b0c10;
-      --fg: #e6e6e6;
-      --muted: #a0a4ab;
-      --accent: #4da3ff;
-      --panel: #151821;
-      --border: #283046;
+      --bg:#0b0c10; --fg:#e6e6e6; --muted:#a0a4ab; --accent:#4da3ff;
+      --panel:#151821; --border:#283046;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body {
+    *{box-sizing:border-box;}
+    html,body{height:100%;margin:0;}
+    body{
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
-      background: var(--bg);
-      color: var(--fg);
-      display: grid;
-      grid-template-rows: auto 1fr;
+      background:var(--bg); color:var(--fg);
+      display:grid; grid-template-rows:auto 1fr;
     }
-    header {
-      padding: 12px 16px;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(0deg, var(--panel), #0e111a);
+    header{
+      padding:12px 16px; display:flex; align-items:center; gap:16px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(0deg, var(--panel), #0e111a);
     }
-    header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
-    .controls {
-      display: flex;
-      gap: 12px 20px;
-      align-items: center;
+    header h1{font-size:16px; margin:0; font-weight:600;}
+
+    /* Viewer region */
+    #stage{
+      position:relative; height:calc(100vh - 64px);
+      overflow:hidden;
     }
-    .button {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 13px; border-radius: 8px;
-      background: #1c2230; border: 1px solid var(--border);
-      color: var(--fg); cursor: pointer; font-size: 13px;
+    model-viewer{
+      width:100%; height:100%; background:#0d1117;
     }
-    #viewer-wrap { position: relative; height: calc(100vh - 64px); }
-    model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
-    footer {
-      position: absolute; right: 14px; bottom: 14px; opacity: .75; font-size: 13px; color: var(--muted);
+
+    /* Side text panels (match the circled areas) */
+    .side{
+      position:absolute; top:50%; transform:translateY(-50%);
+      width:min(38vw, 540px);  /* caps width on large screens */
+      max-width:46%;           /* keep space for the model */
+      color:#dfe3ea;
+      pointer-events:none;     /* allow drag on viewer by default */
+    }
+    .side .card{
+      pointer-events:auto;     /* but still allow selecting / copying text */
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px;
+      padding:28px 28px;
+      backdrop-filter:saturate(110%) blur(0.5px);
+    }
+    .side.left{ left:2vw; }
+    .side.right{ right:2vw; }
+
+    /* Typography to mirror the design */
+    .kicker{
+      font-size:13px; letter-spacing:0.04em; text-transform:uppercase;
+      color:#cfd5de; font-weight:700; margin:0 0 10px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .rule{
+      flex:1; height:1px; background:rgba(255,255,255,0.18);
+      margin-left:10px;
+    }
+    .line{
+      font-size:14px; color:#b9bfca; line-height:1.6; margin:8px 0 0;
+    }
+
+    /* Bullet rows with small circular icons (placeholders using CSS) */
+    .icon-row{
+      display:flex; align-items:center; gap:10px; margin-top:10px;
+    }
+    .icon{
+      width:24px; height:24px; border-radius:50%;
+      border:1px solid rgba(255,255,255,0.35);
+      display:grid; place-items:center; font-size:12px; color:#a9b1bd;
+      flex:0 0 auto;
+    }
+
+    /* Responsive: hide a side if screen is too narrow; stack below header */
+    @media (max-width: 1050px){
+      .side{ width:min(42vw,520px); }
+    }
+    @media (max-width: 900px){
+      .side{ position:static; transform:none; max-width:unset; width:auto; margin:12px 12px 0; }
+      #stage{ display:flex; flex-direction:column; }
+      model-viewer{ order:2; height:65vh; }
+      .side.left{ order:1; }
+      .side.right{ order:3; margin-bottom:12px;}
     }
   </style>
 </head>
 <body>
   <header>
     <h1>3D Model Viewer</h1>
-    <div class="controls">
-      <button id="playAnimation" class="button" type="button">Play Animation</button>
-    </div>
   </header>
-  <div id="viewer-wrap">
+
+  <div id="stage">
+    <!-- Left text block -->
+    <div class="side left">
+      <div class="card">
+        <p class="kicker">Hydration that lasts.<span class="rule"></span></p>
+        <div class="icon-row">
+          <span class="icon">💧</span>
+          <p class="line">Locks in moisture so your skin stays soft and dewy all day.</p>
+        </div>
+
+        <p class="kicker" style="margin-top:18px;">Glow from within.<span class="rule"></span></p>
+        <div class="icon-row">
+          <span class="icon">✴️</span>
+          <p class="line">Brightens dull skin, evens tone, and leaves a natural radiance.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model in the middle -->
     <model-viewer id="viewer"
       src="https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb"
       ar
@@ -76,69 +132,28 @@
       alt="3D model viewer"
       shadow-intensity="0">
     </model-viewer>
-    <footer>Tip: Drag to orbit, scroll to zoom. Use the button to play animation.</footer>
+
+    <!-- Right text block -->
+    <div class="side right">
+      <div class="card">
+        <p class="kicker">Effortless results.<span class="rule"></span></p>
+        <div class="icon-row">
+          <span class="icon">⚡</span>
+          <p class="line">Our mess‑free applicator delivers effortless results in every swipe.</p>
+        </div>
+
+        <p class="kicker" style="margin-top:18px;">Powered by a breakthrough formula<span class="rule"></span></p>
+        <div class="icon-row">
+          <span class="icon">🧪</span>
+          <p class="line">A game‑changing blend that elevates your skin with every use.</p>
+        </div>
+      </div>
+    </div>
   </div>
+
   <script>
-    // Single model with only Play Animation control
-    const viewer = document.getElementById('viewer');
-    const playAnimation = document.getElementById('playAnimation');
-
-    // Ensure no autoplay
-    viewer.autoplay = false;
-
-    // Stop at end helper: pause and clamp to end frame
-    function stopAtEnd() {
-      try {
-        viewer.pause?.();
-        const end = viewer.duration ?? viewer.endTime;
-        if (Number.isFinite(end)) {
-          viewer.currentTime = end;
-        }
-      } catch {}
-    }
-
-    // Prevent wrap-around if the clip is authored looping
-    let rafId = null;
-    function watchForWrap() {
-      cancelAnimationFrame(rafId);
-      let lastTime = viewer.currentTime ?? 0;
-      const end = viewer.duration ?? viewer.endTime;
-      const tick = () => {
-        const t = viewer.currentTime ?? 0;
-        if (Number.isFinite(end) && t < lastTime && lastTime > 0.0) {
-          stopAtEnd();
-          return;
-        }
-        lastTime = t;
-        rafId = requestAnimationFrame(tick);
-      };
-      rafId = requestAnimationFrame(tick);
-    }
-    function cancelWatch() {
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
-
-    // On animation finished, fully stop and clamp
-    viewer.addEventListener('finished', () => {
-      cancelWatch();
-      stopAtEnd();
-    });
-
-    // Play once on button click, never loop
-    playAnimation.addEventListener('click', async () => {
-      const firstAnim = viewer.availableAnimations?.[0] || null;
-      if (!firstAnim) return;
-      viewer.pause?.();
-      viewer.animationName = firstAnim;
-      viewer.currentTime = 0;
-      try {
-        await viewer.play?.({ repetitions: 1 });
-      } catch {
-        viewer.play?.();
-      }
-      watchForWrap();
-    });
+    // Optional: ensure autoplay is disabled (safety)
+    document.getElementById('viewer').autoplay = false;
   </script>
 </body>
 </html>
