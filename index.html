@@ -3,205 +3,140 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Model Viewer – Click to Reveal (Placed Exactly)</title>
-
-  <!-- model-viewer -->
+  <title>3D Model Viewer - Animation Only</title>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
-
-  <!-- Inter font -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
-
   <style>
-    :root{
-      --ink:#202326;
-      --body:#555a5f;
-      --rule:#a2a7ad;
-      --bg:#ffffff;
+    :root {
+      color-scheme: light dark;
+      --bg: #0b0c10;
+      --fg: #e6e6e6;
+      --muted: #a0a4ab;
+      --accent: #4da3ff;
+      --panel: #151821;
+      --border: #283046;
     }
-    *{box-sizing:border-box;}
-    html,body{height:100%;margin:0;}
-    body{background:var(--bg);color:var(--ink);font-family:Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
-
-    /* Layout */
-    .stage{
-      min-height:100vh;
-      display:grid;
-      grid-template-columns: 1fr minmax(420px, 560px) 1fr;
-      align-items:center;
-      gap:48px;
-      padding:24px 48px 56px;
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+      background: var(--bg);
+      color: var(--fg);
+      display: grid;
+      grid-template-rows: auto 1fr;
     }
-
-    .model-wrap{
-      position:relative;
-      width:100%;
-      height:min(78vh, 900px);
-      display:grid; place-items:center;
-      background:#eef0f5;     /* light backdrop like your screenshot */
-      border-radius:8px;
+    header {
+      padding: 12px 16px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(0deg, var(--panel), #0e111a);
     }
-    model-viewer{
-      width:100%;
-      height:100%;
-      background:transparent;
-      --poster-color:transparent;
+    header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
+    .controls {
+      display: flex;
+      gap: 12px 20px;
+      align-items: center;
     }
-
-    .info{
-      justify-self:center;
-      width:min(520px, 92%);
-      background:#fff;
-      border-radius:18px;
-      padding:26px 28px;
-      box-shadow:0 20px 60px rgba(0,0,0,.08);
-      position:relative; /* anchor for the circle */
+    .button {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 13px; border-radius: 8px;
+      background: #1c2230; border: 1px solid var(--border);
+      color: var(--fg); cursor: pointer; font-size: 13px;
     }
-
-    .kicker{
-      margin:0 0 8px;
-      font-size:13px;
-      font-weight:700;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-      color:var(--ink);
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-    .rule{flex:1;height:1px;background:var(--rule);opacity:.85;}
-    .copy{margin:8px 0 0;font-size:14px;line-height:1.7;color:var(--body);}
-    .section + .section{margin-top:18px;}
-
-    /* Exact circle button placement */
-    .reveal{
-      position:absolute;
-      left:50%;
-      transform:translateX(-150%); /* shifted left from card center */
-      bottom:-200px;               /* pushed down under the right card */
-      width:160px; height:160px;
-      border-radius:50%;
-      border:2px solid #111;
-      background:#fff;
-      display:grid; place-items:center;
-      cursor:pointer;
-      user-select:none;
-      transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
-      z-index:3;
-    }
-    /* Hover keeps same X offset, only adds slight lift */
-    .reveal:hover{
-      background:#f2f4f7;
-      transform: translateX(-150%) translateY(-2px);
-      box-shadow:0 12px 30px rgba(0,0,0,.12);
-    }
-    .reveal span{
-      display:block; width:80%; text-align:center;
-      font-size:12px; font-weight:700; letter-spacing:.06em; line-height:1.2;
-      color:#111; text-transform:uppercase;
-    }
-
-    /* Responsive */
-    @media (max-width:1100px){
-      .stage{grid-template-columns:1fr; gap:18px; padding:12px 16px 120px;}
-      .model-wrap{order:2; height:64vh;}
-      .info{width:100%; padding:22px 20px; border-radius:14px;}
-      .reveal{
-        bottom:-625px;            /* position for stacked layout */
-        width:140px; height:140px;
-        transform: translateX(-125%); /* stronger left shift on mobile */
-      }
-      .reveal:hover{
-        background:#f2f4f7;
-        transform: translateX(-125%) translateY(-2px);
-        box-shadow:0 12px 30px rgba(0,0,0,.12);
-      }
+    #viewer-wrap { position: relative; height: calc(100vh - 64px); }
+    model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
+    footer {
+      position: absolute; right: 14px; bottom: 14px; opacity: .75; font-size: 13px; color: var(--muted);
     }
   </style>
 </head>
 <body>
-  <main class="stage">
-    <!-- Left block -->
-    <aside class="info">
-      <div class="section">
-        <h3 class="kicker">Hydration that lasts.<span class="rule"></span></h3>
-        <p class="copy">Locks in moisture so your skin stays soft and dewy all day.</p>
-      </div>
-      <div class="section">
-        <h3 class="kicker">Glow from within.<span class="rule"></span></h3>
-        <p class="copy">Brightens dull skin, evens tone, and leaves a natural radiance.</p>
-      </div>
-    </aside>
-
-    <!-- Center model -->
-    <div class="model-wrap">
-      <model-viewer id="viewer"
-        src="https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb"
-        ar camera-controls touch-action="pan-y"
-        environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-        skybox-image="https://raw.githubusercontent.com/swaroop36/xenreality.github.io/cd658672d3e06d30acc82e6664dc38c4fdfb5298/white_background.jpg"
-        tone-mapping="aces" exposure="1.0" field-of-view="70deg"
-        camera-orbit="0deg 75deg 25m" min-camera-orbit="auto auto 5m" max-camera-orbit="auto auto 50m"
-        autoplay="false" alt="3D model viewer" shadow-intensity="0">
-      </model-viewer>
+  <header>
+    <h1>3D Model Viewer</h1>
+    <div class="controls">
+      <button id="playAnimation" class="button" type="button">Play Animation</button>
     </div>
-
-    <!-- Right block with circle button placed beneath it -->
-    <aside class="info" id="rightCard">
-      <div class="section">
-        <h3 class="kicker">Effortless results.<span class="rule"></span></h3>
-        <p class="copy">Our mess‑free applicator delivers effortless results in every swipe.</p>
-      </div>
-      <div class="section">
-        <h3 class="kicker">Powered by a breakthrough formula<span class="rule"></span></h3>
-        <p class="copy">A game‑changing blend that elevates your skin with every use.</p>
-      </div>
-
-      <!-- Circular "CLICK TO REVEAL WHY" button -->
-      <button id="revealBtn" class="reveal" type="button" aria-label="Click to reveal">
-        <span>CLICK TO REVEAL WHY</span>
-      </button>
-    </aside>
-  </main>
-
+  </header>
+  <div id="viewer-wrap">
+    <model-viewer id="viewer"
+      src="https://swaroop36.github.io/xenreality.github.io/zuri_gold.glb"
+      ar
+      camera-controls
+      touch-action="pan-y"
+      environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
+      skybox-image="https://raw.githubusercontent.com/swaroop36/xenreality.github.io/cd658672d3e06d30acc82e6664dc38c4fdfb5298/white_background.jpg"
+      tone-mapping="aces"
+      exposure="1.0"
+      field-of-view="70deg"
+      camera-orbit="0deg 75deg 25m"
+      min-camera-orbit="auto auto 5m"
+      max-camera-orbit="auto auto 50m"
+      autoplay="false"
+      alt="3D model viewer"
+      shadow-intensity="0">
+    </model-viewer>
+    <footer>Tip: Drag to orbit, scroll to zoom. Use the button to play animation.</footer>
+  </div>
   <script>
+    // Single model with only Play Animation control
     const viewer = document.getElementById('viewer');
-    const revealBtn = document.getElementById('revealBtn');
+    const playAnimation = document.getElementById('playAnimation');
 
+    // Ensure no autoplay
     viewer.autoplay = false;
 
-    function stopAtEnd(){
-      try{
+    // Stop at end helper: pause and clamp to end frame
+    function stopAtEnd() {
+      try {
         viewer.pause?.();
         const end = viewer.duration ?? viewer.endTime;
-        if (Number.isFinite(end)) viewer.currentTime = end;
-      }catch(e){}
+        if (Number.isFinite(end)) {
+          viewer.currentTime = end;
+        }
+      } catch {}
     }
 
-    let rafId=null;
-    function watchForWrap(){
+    // Prevent wrap-around if the clip is authored looping
+    let rafId = null;
+    function watchForWrap() {
       cancelAnimationFrame(rafId);
-      let last = viewer.currentTime ?? 0;
+      let lastTime = viewer.currentTime ?? 0;
       const end = viewer.duration ?? viewer.endTime;
       const tick = () => {
         const t = viewer.currentTime ?? 0;
-        if (Number.isFinite(end) && t < last && last > 0){ stopAtEnd(); return; }
-        last = t; rafId = requestAnimationFrame(tick);
+        if (Number.isFinite(end) && t < lastTime && lastTime > 0.0) {
+          stopAtEnd();
+          return;
+        }
+        lastTime = t;
+        rafId = requestAnimationFrame(tick);
       };
       rafId = requestAnimationFrame(tick);
     }
-    function cancelWatch(){ cancelAnimationFrame(rafId); rafId=null; }
-    viewer.addEventListener('finished', () => { cancelWatch(); stopAtEnd(); });
+    function cancelWatch() {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
 
-    // Play the first animation once when circle is clicked
-    revealBtn.addEventListener('click', async () => {
-      const firstAnim = viewer.availableAnimations?.[0] ?? null;
+    // On animation finished, fully stop and clamp
+    viewer.addEventListener('finished', () => {
+      cancelWatch();
+      stopAtEnd();
+    });
+
+    // Play once on button click, never loop
+    playAnimation.addEventListener('click', async () => {
+      const firstAnim = viewer.availableAnimations?.[0] || null;
       if (!firstAnim) return;
       viewer.pause?.();
       viewer.animationName = firstAnim;
       viewer.currentTime = 0;
-      try { await viewer.play?.({ repetitions: 1 }); }
-      catch { viewer.play?.(); }
+      try {
+        await viewer.play?.({ repetitions: 1 });
+      } catch {
+        viewer.play?.();
+      }
       watchForWrap();
     });
   </script>
