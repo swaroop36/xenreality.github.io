@@ -3,143 +3,174 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>3D Model Viewer - Animation Only</title>
+  <title>Model Viewer – Click to Reveal (Model + Button, Original Placement)</title>
+
+  <!-- model-viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.0.0/model-viewer.min.js"></script>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #0b0c10;
-      --fg: #e6e6e6;
-      --muted: #a0a4ab;
-      --accent: #4da3ff;
-      --panel: #151821;
-      --border: #283046;
+    :root{
+      --ink:#202326;
+      --bg:#ffffff;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
-      background: var(--bg);
-      color: var(--fg);
-      display: grid;
-      grid-template-rows: auto 1fr;
+    *{box-sizing:border-box;}
+    html,body{height:100%;margin:0;}
+    body{
+      background:var(--bg);
+      color:var(--ink);
+      font-family:Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     }
-    header {
-      padding: 12px 16px;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(0deg, var(--panel), #0e111a);
+
+    /* Two-column grid: model centered, button column on the right */
+    .stage{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns: 1fr minmax(420px, 560px) 1fr; /* left gutter | model | right gutter */
+      align-items:center;
+      gap:48px;
+      padding:24px 48px 56px;
+      position:relative;
     }
-    header h1 { font-size: 16px; margin: 0 8px 0 0; font-weight: 600; }
-    .controls {
-      display: flex;
-      gap: 12px 20px;
-      align-items: center;
+
+    /* Model in middle column with light backdrop */
+    .model-wrap{
+      grid-column: 2;
+      position:relative;
+      width:100%;
+      height:min(78vh, 900px);
+      display:grid; place-items:center;
+      background:#eef0f5;
+      border-radius:8px;
     }
-    .button {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 13px; border-radius: 8px;
-      background: #1c2230; border: 1px solid var(--border);
-      color: var(--fg); cursor: pointer; font-size: 13px;
+    model-viewer{
+      width:100%; height:100%;
+      background:transparent; --poster-color:transparent;
     }
-    #viewer-wrap { position: relative; height: calc(100vh - 64px); }
-    model-viewer { width: 100%; height: 100%; background-color: #0d1117; }
-    footer {
-      position: absolute; right: 14px; bottom: 14px; opacity: .75; font-size: 13px; color: var(--muted);
-    }
+
+    /* Button column (right) */
+    .button-col{
+  grid-column: 3;               /* right column */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;          /* keep it vertically centered */
+}
+
+/* Reveal button (desktop) */
+.reveal{
+  position: relative;           /* no absolute positioning */
+  width:160px; 
+  height:160px;
+  border-radius:50%;
+  border:2px solid #111;
+  background:#fff;
+  display:grid; 
+  place-items:center;
+  cursor:pointer;
+  user-select:none;
+  transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+  z-index:3;
+}
+.reveal:hover{
+  background:#f2f4f7;
+  transform: translateY(-2px);  /* subtle lift only */
+  box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+.reveal span{
+  display:block; 
+  width:80%; 
+  text-align:center;
+  font-size:12px; 
+  font-weight:700; 
+  letter-spacing:.06em; 
+  line-height:1.2;
+  color:#111; 
+  text-transform:uppercase;
+}
+
+/* Mobile: stacked below model */
+@media (max-width:1100px){
+  .button-col{ 
+    grid-column: 1; 
+    height:auto; 
+    display:flex; 
+    justify-content:center; 
+    margin-top:16px;
+  }
+
+  .reveal{
+    width:140px; 
+    height:140px;
+  }
+}
   </style>
 </head>
 <body>
-  <header>
-    <h1>3D Model Viewer</h1>
-    <div class="controls">
-      <button id="playAnimation" class="button" type="button">Play Animation</button>
+  <main class="stage">
+    <!-- Center model only -->
+    <div class="model-wrap">
+      <model-viewer id="viewer"
+  src="2.glb"
+  ar camera-controls touch-action="pan-y"
+  style="background:#ffffff; --poster-color:#ffffff;"
+  tone-mapping="aces" exposure="1.0" field-of-view="70deg"
+  camera-orbit="0deg 75deg 1m" min-camera-orbit="auto auto 1m" max-camera-orbit="auto auto 20m"
+  autoplay="false" alt="3D model viewer" shadow-intensity="0">
+      </model-viewer>
     </div>
-  </header>
-  <div id="viewer-wrap">
-    <model-viewer id="viewer"
-      src=""
-      ar
-      camera-controls
-      touch-action="pan-y"
-      environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-      skybox-image="https://raw.githubusercontent.com/swaroop36/xenreality.github.io/cd658672d3e06d30acc82e6664dc38c4fdfb5298/white_background.jpg"
-      tone-mapping="aces"
-      exposure="1.0"
-      field-of-view="70deg"
-      camera-orbit="0deg 75deg 25m"
-      min-camera-orbit="auto auto 5m"
-      max-camera-orbit="auto auto 50m"
-      autoplay="false"
-      alt="3D model viewer"
-      shadow-intensity="0">
-    </model-viewer>
-    <footer>Tip: Drag to orbit, scroll to zoom. Use the button to play animation.</footer>
-  </div>
-  <script>
-    // Single model with only Play Animation control
-    const viewer = document.getElementById('viewer');
-    const playAnimation = document.getElementById('playAnimation');
 
-    // Ensure no autoplay
+    <!-- Reveal button in the right area -->
+    <div class="button-col">
+      <button id="revealBtn" class="reveal" type="button" aria-label="Click to reveal">
+        <span>CLICK TO REVEAL WHY</span>
+      </button>
+    </div>
+  </main>
+
+  <script>
+    const viewer = document.getElementById('viewer');
+    const revealBtn = document.getElementById('revealBtn');
+
     viewer.autoplay = false;
 
-    // Stop at end helper: pause and clamp to end frame
-    function stopAtEnd() {
-      try {
+    function stopAtEnd(){
+      try{
         viewer.pause?.();
         const end = viewer.duration ?? viewer.endTime;
-        if (Number.isFinite(end)) {
-          viewer.currentTime = end;
-        }
-      } catch {}
+        if (Number.isFinite(end)) viewer.currentTime = end;
+      }catch(e){}
     }
 
-    // Prevent wrap-around if the clip is authored looping
-    let rafId = null;
-    function watchForWrap() {
+    let rafId=null;
+    function watchForWrap(){
       cancelAnimationFrame(rafId);
-      let lastTime = viewer.currentTime ?? 0;
+      let last = viewer.currentTime ?? 0;
       const end = viewer.duration ?? viewer.endTime;
       const tick = () => {
         const t = viewer.currentTime ?? 0;
-        if (Number.isFinite(end) && t < lastTime && lastTime > 0.0) {
-          stopAtEnd();
-          return;
-        }
-        lastTime = t;
-        rafId = requestAnimationFrame(tick);
+        if (Number.isFinite(end) && t < last && last > 0){ stopAtEnd(); return; }
+        last = t; rafId = requestAnimationFrame(tick);
       };
       rafId = requestAnimationFrame(tick);
     }
-    function cancelWatch() {
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
+    function cancelWatch(){ cancelAnimationFrame(rafId); rafId=null; }
+    viewer.addEventListener('finished', () => { cancelWatch(); stopAtEnd(); });
 
-    // On animation finished, fully stop and clamp
-    viewer.addEventListener('finished', () => {
-      cancelWatch();
-      stopAtEnd();
-    });
-
-    // Play once on button click, never loop
-    playAnimation.addEventListener('click', async () => {
-      const firstAnim = viewer.availableAnimations?.[0] || null;
+    // Play the first animation once when circle is clicked
+    revealBtn.addEventListener('click', async () => {
+      const firstAnim = viewer.availableAnimations?.[0] ?? null;
       if (!firstAnim) return;
       viewer.pause?.();
       viewer.animationName = firstAnim;
       viewer.currentTime = 0;
-      try {
-        await viewer.play?.({ repetitions: 1 });
-      } catch {
-        viewer.play?.();
-      }
+      try { await viewer.play?.({ repetitions: 1 }); }
+      catch { viewer.play?.(); }
       watchForWrap();
     });
   </script>
 </body>
 </html>
-
